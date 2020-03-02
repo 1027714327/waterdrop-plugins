@@ -109,7 +109,7 @@ esac
 base=${bin_abs_path}/..
 echo "config is $base/conf/$1"
 # ../bin/start-waterdrop.sh --master yarn --deploy-mode client --config ./$1
-nohup sh /home/bgyetl/waterdrop-1.4.0/bin/start-waterdrop.sh --master yarn --deploy-mode client --config $base/conf/$1 &
+nohup sh /home/liutangrong/waterdrop-1.4.0/bin/start-waterdrop.sh --master yarn --deploy-mode client --config $base/conf/$1 &
 ```
 **注意：配置文件名称为: state_表名称.conf，这是一个强制执行的规定。**
 
@@ -226,11 +226,13 @@ nohup sh /home/bgyetl/waterdrop-1.4.0/bin/start-waterdrop.sh --master yarn --dep
 注意，如果是分区表，必须添加以下参数：
 ```
   spark.sql.catalogImplementation = "hive"
-  spark.security.credentials.hive.enabled="false"
-  spark.security.credentials.hbase.enabled="false"
   hive.exec.dynamic.partition.mode="nonstrict"
 ```
-
+如果开启了security，需要修改waterdrop的启动脚本，并添加以下参数：
+```
+  spark.security.credentials.hive.enabled="false"
+  spark.security.credentials.hbase.enabled="false"
+```
 
 ##### 7.4. 完整例子
 ```
