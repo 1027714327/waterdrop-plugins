@@ -2,7 +2,7 @@
 [toc]
 #### 1. 开发背景
 
-目前，业务中台数据需要准实时落入数仓，根据建设方案，在hive中，将临时表数据准实时合并到主表中，调度实践根据业务规则而定。
+目前，业务中台数据需要准实时落入数仓，根据建设方案，在hive中，将临时表数据准实时合并到主表中，调度频率根据业务规则而定。
 
 #### 2. 实现目标
 
@@ -120,22 +120,23 @@ nohup sh /home/liutangrong/waterdrop-1.4.0/bin/start-waterdrop.sh --master yarn 
 #### 7.自研插件
 ##### 7.1. input插件-MHive
 
-* Description
+* Description 
   自定义SQL解析，可以方便根据情景查询指定需要的数据。
-* Options
+* Options 
 
-| name                                                         | type   | required | default value\example value |
-| ------------------------------------------------------------ | ------ | -------- | ------------- |
-| pre_sql | string | yes     | -          |
-| result_table_name| string | yes    | -        |
-| time_format| string | no       | yyyyMMdd     |
-| rank_partition_keys| List | no       | ["id","mem_id"] |
-| rank_order_keys| List | no       | ["part_date desc"] |
-**pre_sql：**需要查询数据的SQL。
-**result_table_name：**注册到Spark全局表名称，供后续流程使用。
-**time_format：**时间格式化默认格式。
-**rank_partition_keys：**排序分区字段，根据rank_order_keys取第一条数据。
-**rank_order_keys：**排序规则。
+  | name                                                         | type   | required | default value\example value |
+  | ------------------------------------------------------------ | ------ | -------- | ------------- |
+  | pre_sql | string | yes     | -          |
+  | result_table_name| string | yes    | -        |
+  | time_format| string | no       | yyyyMMdd     |
+  | rank_partition_keys| List | no       | ["id","mem_id"] |
+  | rank_order_keys| List | no       | ["part_date desc"] |
+  
+  **pre_sql：**需要查询数据的SQL。
+  **result_table_name：**注册到Spark全局表名称，供后续流程使用。
+  **time_format：**时间格式化默认格式。
+  **rank_partition_keys：**排序分区字段，根据rank_order_keys取第一条数据。
+  **rank_order_keys：**排序规则。
 
 * Other
 
@@ -172,22 +173,25 @@ nohup sh /home/liutangrong/waterdrop-1.4.0/bin/start-waterdrop.sh --master yarn 
 
 ##### 7.2. filter插件-MergeData（自定义合并数据插件）
 
-* Description
+* Description 
   自定义合并数据插件，准实时合并数据。
 * Options
 
-| name              | type   | required | default value |
-| ----------------- | ------ | -------- | ------------- |
-| master_table      | string | yes      | -             |
-| tmp_table         | string | yes      | -             |
-| join_keys        | list | no       | -     |
-| join_type         | string | no       | left join     |
-| result_table_name | string   | no       | -             |
-**master_table：**合并数据的主表。
-**tmp_table：**合并数据的临时表。
-**join_keys：**主表与临时表关联字段集合。
-**join_type：**主表与临时表关联类型。
-**result_table_name：**注册到Spark全局表名称，供后续流程使用。
+  | name              | type   | required | default value |
+  | ----------------- | ------ | -------- | ------------- |
+  | master_table      | string | yes      | -             |
+  | tmp_table         | string | yes      | -             |
+  | join_keys        | list | no       | -     |
+  | join_type         | string | no       | left join     |
+  | result_table_name | string   | no       | -             |
+  
+  
+  
+  **master_table：**合并数据的主表。
+  **tmp_table：**合并数据的临时表。
+  **join_keys：**主表与临时表关联字段集合。
+  **join_type：**主表与临时表关联类型。
+  **result_table_name：**注册到Spark全局表名称，供后续流程使用。
 * Example
 
 ```
@@ -202,18 +206,20 @@ nohup sh /home/liutangrong/waterdrop-1.4.0/bin/start-waterdrop.sh --master yarn 
 
 ##### 7.3. out插件-InsertHive
 
-* Description
+* Description 
   自定义写入数据到Hive插件，解决数据写入Hive不刷新元数据问题。
 * Options
 
-| name              | type   | required | default value |
-| ----------------- | ------ | -------- | ------------- |
-| source_table_name | string | yes      | -             |
-| save_mode         | string | yes      | error         |
-| table             | string | no       | -             |
-**source_table_name：**需要输出到hive来源表。
-**save_mode：**数据保存模式，参考spark。
-**table：**写入hive的目标表。
+  | name              | type   | required | default value |
+  | ----------------- | ------ | -------- | ------------- |
+  | source_table_name | string | yes      | -             |
+  | save_mode         | string | yes      | error         |
+  | table             | string | no       | -             |
+  
+  
+  **source_table_name：**需要输出到hive来源表。
+  **save_mode：**数据保存模式，参考spark。
+  **table：**写入hive的目标表。
 * Example
 
 ```
