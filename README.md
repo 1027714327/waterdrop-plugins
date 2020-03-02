@@ -12,9 +12,9 @@
 
 参考开源文档：https://github.com/InterestingLab/waterdrop
 
-目前部署在CDH生产集群：slave6.pagoda.com.cn
+目前部署在CDH集群：
 
-部署路径：/home/bgyetl/waterdrop-1.4.0
+部署路径：
 
 #### 4. 编写配置文件
 
