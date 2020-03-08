@@ -29,6 +29,8 @@ public class MergeData extends BaseFilter {
     public void prepare(SparkSession spark) {
         Map<String, Object> map = new HashMap();
         map.put("join_type", " left join ");
+        map.put("union_tmp_table_where_sql", " 1=1 ");
+        map.put("union_tmp_table_col", " *  ");
         Config defaultConfig = ConfigFactory.parseMap(map);
         conf = conf.withFallback(defaultConfig);
     }
@@ -39,10 +41,13 @@ public class MergeData extends BaseFilter {
         String tmpTable = conf.getString("tmp_table");
         String joinType = conf.getString("join_type");
         String resultTableName = conf.getString("result_table_name");
+        String unionTmpTableWhereSql=conf.getString("union_tmp_table_where_sql");
+        String unionTmpTableCol=conf.getString("union_tmp_table_col");
+
         String joinString = Joiner.on(" and ").join(conf.getStringList("join_keys").stream().map(f -> " m." + f + "= t." + f).collect(Collectors.toList()));
         String whereSQL = "  WHERE " + Joiner.on(" and ").join(conf.getStringList("join_keys").stream().map(f -> " t." + f + " is null ").collect(Collectors.toList()));
         Dataset<Row> diffMasterTable = spark.sql("SELECT  m.*  FROM  " + masterTable + "  as m " + joinType + "  " + tmpTable + "  as t on " + joinString + whereSQL);
-        Dataset<Row> tmpTableDF = spark.sql("SELECT * FROM " + tmpTable);
+        Dataset<Row> tmpTableDF = spark.sql("SELECT "+unionTmpTableCol+" FROM " + tmpTable + " where " + unionTmpTableWhereSql);
         Dataset<Row> allDf=tmpTableDF.unionAll(diffMasterTable);
         allDf.createOrReplaceTempView(resultTableName);
         return allDf;

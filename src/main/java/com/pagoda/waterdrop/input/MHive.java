@@ -21,7 +21,7 @@ import java.util.stream.Stream;
  * @author 刘唐荣
  * @version 1.0.0
  * @ClassName MHive.java
- * @Description TODO
+ * @Description TODO  好像只会初始一次，导致类信息被共享
  * @createTime 2020-02-27 22:07:00
  */
 public class MHive extends BaseStaticInput {
@@ -35,13 +35,18 @@ public class MHive extends BaseStaticInput {
         String timeFormat = config.getString("time_format");
         List<String> rankPartitionKeys = config.getStringList("rank_partition_keys");
         List<String> rankOrderKeys = config.getStringList("rank_order_keys");
+        List<String> resultTableCols = config.getStringList("result_table_cols");
+        log().warn(preSql);
+        log().warn(regTable);
         //boolean addSyncTime = config.getBoolean("add_sync_time");
         List<String> keys = Tools.getTemplateKey(preSql);
         Map<String, Object> paras = Tools.processTemplateKey(keys, timeFormat);
         String newPreSql = Tools.processTemplate(preSql, paras);
         Dataset<Row> tmpDataSet = spark.sql(newPreSql);
+
         Optional<Column> winFunc = Optional.empty();
         if (!rankPartitionKeys.isEmpty() && !rankOrderKeys.isEmpty()) {
+            log().warn(newPreSql+ Joiner.on(",").join( rankPartitionKeys));
             List<Column> partitionKeyCols = rankPartitionKeys.stream().map(f -> functions.col(f)).collect(Collectors.toList());
             List<Column> orderKeyCols = rankOrderKeys.stream().map(f -> {
                 String[] orderKeys = f.split(" ");
@@ -72,6 +77,18 @@ public class MHive extends BaseStaticInput {
                     .drop(functions.col("rank"));
         } else {
             dataSet = tmpDataSet;
+        }
+
+        if(!resultTableCols.isEmpty()){
+            List<Column> selectCols = resultTableCols.stream().map(f -> {
+                String[] cols = f.split(" as | AS ");
+                if(cols.length>1){
+                    return functions.col(cols[0].trim()).alias(cols[1].trim());
+                }else {
+                    return functions.col(f.trim());
+                }
+            }).collect(Collectors.toList());
+            dataSet=dataSet.select(JavaConverters.asScalaBufferConverter(selectCols).asScala());
         }
         dataSet.createOrReplaceTempView(regTable);
         return dataSet;
@@ -113,6 +130,7 @@ public class MHive extends BaseStaticInput {
         map.put("time_format", "yyyyMMdd");
         map.put("rank_partition_keys", new ArrayList<String>());
         map.put("rank_order_keys", new ArrayList<String>());
+        map.put("result_table_cols",new ArrayList<String>());
         //map.put("add_sync_time", false);
         Config defaultConfig = ConfigFactory.parseMap(map);
         config = config.withFallback(defaultConfig);

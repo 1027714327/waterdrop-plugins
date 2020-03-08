@@ -19,7 +19,7 @@ import java.util.Objects;
  * @author 刘唐荣
  * @version 1.0.0
  * @ClassName MsckRepairTable.java
- * @Description TODO
+ * @Description TODO spark 如果不是分区表，会报无法修复表。
  * @createTime 2020-02-27 10:31:00
  */
 public class MsckRepairTable extends BaseOutput {

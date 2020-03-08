@@ -29,6 +29,7 @@ public class Tools implements Serializable {
         String newPreSql = Tools.processTemplate(preSql,pamra );
         System.out.println(newPreSql);
         System.out.println(Joiner.on(",").skipNulls().join("id","i2"));
+        System.out.println("c1".split(" as | AS ")[0].trim());
     }
     /**
      * 模板替换

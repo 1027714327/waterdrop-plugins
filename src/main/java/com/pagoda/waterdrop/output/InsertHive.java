@@ -39,8 +39,24 @@ public class InsertHive extends BaseOutput {
     @Override
     public void process(Dataset<Row> df) {
         //double num = Integer.valueOf(1.0 * (df.count()) / 100);
-        DataFrameWriter<Row> writer = df.write().mode(config.getString("save_mode"));
-        writer.insertInto(config.getString("table"));
+        String tableName=config.getString("table");
+        String saveMode = config.getString("save_mode");
+        String pre_sql = config.getString("pre_sql");
+        if (!"None".equals(pre_sql)){
+            df.sparkSession().sql(pre_sql);
+            return;
+        }
+
+        if ("overwrite".equals(saveMode)) {
+            df.write().mode(saveMode).saveAsTable(tableName+"_tmp");
+            Dataset<Row> newDf = df.sparkSession().table(tableName + "_tmp");
+            newDf.write().mode(saveMode).saveAsTable(tableName);
+            df.sparkSession().sql("drop table "+tableName + "_tmp");
+        } else {
+            DataFrameWriter<Row> writer = df.write().mode(saveMode);
+            writer.insertInto(tableName);
+        }
+
     }
 
     @Override
@@ -57,8 +73,8 @@ public class InsertHive extends BaseOutput {
     @Override
     public void prepare(SparkSession spark) {
         Map<String, Object> map = new HashMap();
-        map.put("save_mode","error");
-        // map.put("save_mode","error");
+        map.put("save_mode", "error");
+        map.put("pre_sql","None");
         Config defaultConfig = ConfigFactory.parseMap(map);
         config = config.withFallback(defaultConfig);
     }
